@@ -55,6 +55,7 @@ module "cloudwatch_frontend" {
 module "s3" {
   source   = "./modules/s3_logs"
   app_name = var.app_name
+  env      = var.env
 }
 # ----------------------------
 # 3) ALB

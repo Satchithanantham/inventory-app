@@ -3,9 +3,13 @@ data "aws_caller_identity" "current" {}
 # S3 BUCKET FOR ALB ACCESS LOGS
 
 resource "aws_s3_bucket" "alb_logs" {
-  bucket = "${var.app_name}-alb-access-logs"
-  tags   = var.tags
+  bucket = "inventory-alb-access-logs-${var.env}-${random_id.suffix.hex}"
 }
+
+resource "random_id" "suffix" {
+  byte_length = 4
+}
+
 
 # BLOCK PUBLIC ACCESS (MANDATORY)
 

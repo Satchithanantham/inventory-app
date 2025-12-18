@@ -117,3 +117,7 @@ variable "db_username_secret_arn" {
   default = ""
 }
 
+variable "env" {
+  type    = string
+  default = " "
+}
