@@ -57,6 +57,13 @@ module "s3" {
   app_name = var.app_name
   env      = var.env
 }
+
+# ----------------------------
+# ECS Cluster
+# ----------------------------
+resource "aws_ecs_cluster" "main" {
+  name = "${var.app_name}-cluster"
+}
 # ----------------------------
 # 3) ALB
 # ----------------------------
@@ -74,16 +81,8 @@ module "alb" {
   access_logs_bucket = module.s3.alb_logs_bucket_name
   access_logs_prefix = "alb"
 
-  depends_on = [aws_ecs_cluster.main]
 }
 
-
-# ----------------------------
-# ECS Cluster
-# ----------------------------
-resource "aws_ecs_cluster" "main" {
-  name = "${var.app_name}-cluster"
-}
 
 # ECS SG: only ALB can reach container port
 resource "aws_security_group" "ecs" {
@@ -114,9 +113,6 @@ resource "aws_security_group" "ecs" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-  depends_on = [
-    module.alb
-  ]
 
 }
 
