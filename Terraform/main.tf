@@ -2,11 +2,11 @@
 # 0) ECR repo for backend
 # ----------------------------
 module "ecr" {
-  source               = "./modules/ecr"
-  app_name             = var.app_name
+  source           = "./modules/ecr"
+  app_name         = var.app_name
   ecr_repositories = var.ecr_repositories
-  scan_on_push         = true
-  immutable_tags       = false
+  scan_on_push     = true
+  immutable_tags   = false
 
   lifecycle_policy_json = jsonencode({
     rules = [{
@@ -26,11 +26,11 @@ module "ecr" {
 # 1) IAM roles for ECS
 # ----------------------------
 module "iam" {
-  source = "./modules/iam"
+  source   = "./modules/iam"
   app_name = var.app_name
 
-  allowed_secret_arns = ["*"]
-  kms_key_arns        = []
+  allowed_secret_arns   = ["*"]
+  kms_key_arns          = []
   enable_ssm_param_read = false
 }
 
@@ -61,14 +61,14 @@ module "alb" {
   vpc_id            = var.vpc_id
   public_subnet_ids = var.public_subnet_ids
 
-  enable_https     = var.enable_https
-  certificate_arn  = var.certificate_arn
+  enable_https    = var.enable_https
+  certificate_arn = var.certificate_arn
 
   enable_access_logs = false
   access_logs_bucket = null
   access_logs_prefix = null
 
-   depends_on = [aws_ecs_cluster.main]
+  depends_on = [aws_ecs_cluster.main]
 }
 
 
@@ -93,7 +93,7 @@ resource "aws_security_group" "ecs" {
     description     = "ALB to Backend API"
   }
 
-  
+
   ingress {
     from_port       = 80
     to_port         = 80
@@ -101,16 +101,16 @@ resource "aws_security_group" "ecs" {
     security_groups = [module.alb.alb_sg_id]
     description     = "ALB to Frontend"
   }
-  
- egress {
+
+  egress {
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-depends_on = [
+  depends_on = [
     module.alb
-]
+  ]
 
 }
 
@@ -129,7 +129,7 @@ module "ecs_backend" {
   vpc_id             = var.vpc_id
   private_subnet_ids = var.private_subnet_ids
   alb_sg_id          = module.alb.alb_sg_id
-  ecs_sg_id        = aws_security_group.ecs.id
+  ecs_sg_id          = aws_security_group.ecs.id
   target_group_arn   = module.alb.api_tg_arn
 
   image          = "${module.ecr.repository_urls["backend"]}:${var.image_tag}"
@@ -143,9 +143,9 @@ module "ecs_backend" {
   task_role_arn      = module.iam.task_role_arn
 
   # Required for backend
-  db_host               = module.rds.db_address
-  db_port               = tostring(module.rds.db_port)
-  db_name               = var.db_name
+  db_host                = module.rds.db_address
+  db_port                = tostring(module.rds.db_port)
+  db_name                = var.db_name
   db_username_secret_arn = var.db_username_secret_arn
   db_password_secret_arn = var.db_password_secret_arn
 
@@ -197,24 +197,24 @@ module "ecs_frontend" {
 # 5) RDS
 # ----------------------------
 module "rds" {
-  source = "./modules/rds"
+  source   = "./modules/rds"
   app_name = var.app_name
   vpc_id   = var.vpc_id
 
-  private_subnet_ids      = var.private_subnet_ids
-  ecs_sg_id               = aws_security_group.ecs.id
-  engine                  = "mysql"
-  engine_version          = "8.0"
-  db_name                 = "inventory"
-  db_password_secret_arn  = var.db_password_secret_arn
-  depends_on = [aws_security_group.ecs]
+  private_subnet_ids     = var.private_subnet_ids
+  ecs_sg_id              = aws_security_group.ecs.id
+  engine                 = "mysql"
+  engine_version         = "8.0"
+  db_name                = "inventory"
+  db_password_secret_arn = var.db_password_secret_arn
+  depends_on             = [aws_security_group.ecs]
 }
 
 # ----------------------------
 # 6) Optional Route53
 # ----------------------------
 module "dns" {
-  source = "./modules/dns"
+  source         = "./modules/dns"
   hosted_zone_id = "Z0498892K4FC3M48S0VV"
   alb_zone_id    = module.alb.alb_zone_id
 
@@ -228,10 +228,10 @@ module "dns" {
 # 7) WAF
 # ----------------------------
 module "waf" {
-  source        = "./modules/waf"
-  web_acl_name  = "${var.app_name}-waf"
-  scope         = "REGIONAL"
-  alb_arn       = module.alb.alb_arn
+  source         = "./modules/waf"
+  web_acl_name   = "${var.app_name}-waf"
+  scope          = "REGIONAL"
+  alb_arn        = module.alb.alb_arn
   enable_logging = false
   firehose_arn   = null
 }
@@ -277,16 +277,16 @@ module "alarms" {
 
   albs = [
     {
-      name       = "api-alb"
-      arn_suffix = module.alb.api_tg_arn_suffix
-      alb_arn_suffix  = module.alb.alb_arn_suffix
-      threshold  = 5
+      name           = "api-alb"
+      arn_suffix     = module.alb.api_tg_arn_suffix
+      alb_arn_suffix = module.alb.alb_arn_suffix
+      threshold      = 5
     },
     {
-      name       = "frontend-alb"
-      alb_arn_suffix  = module.alb.alb_arn_suffix
-      arn_suffix = module.alb.frontend_tg_arn_suffix
-      threshold  = 5
+      name           = "frontend-alb"
+      alb_arn_suffix = module.alb.alb_arn_suffix
+      arn_suffix     = module.alb.frontend_tg_arn_suffix
+      threshold      = 5
     }
   ]
   depends_on = [module.ecs_backend, module.ecs_frontend, module.alb]

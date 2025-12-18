@@ -75,7 +75,7 @@ resource "aws_lb_target_group" "api" {
   target_type = "ip"
 
   health_check {
-    path                = var.api_health_check_path   # default: "/health"
+    path                = var.api_health_check_path # default: "/health"
     matcher             = "200-399"
     interval            = 15
     timeout             = 5
@@ -98,7 +98,7 @@ resource "aws_lb_target_group" "frontend" {
 
   health_check {
     port                = "traffic-port"
-    path                = var.frontend_health_check_path  # default: "/"
+    path                = var.frontend_health_check_path # default: "/"
     matcher             = "200-399"
     interval            = 15
     timeout             = 5
@@ -160,7 +160,7 @@ resource "aws_lb_listener" "https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.frontend.arn
   }
- depends_on = [aws_lb_target_group.api, aws_lb_target_group.frontend]
+  depends_on = [aws_lb_target_group.api, aws_lb_target_group.frontend]
 }
 
 ################################
@@ -238,7 +238,7 @@ resource "aws_lb_listener_rule" "frontend_https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.frontend.arn
   }
-  
+
 }
 
 data "aws_caller_identity" "current" {}

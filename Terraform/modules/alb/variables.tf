@@ -53,9 +53,9 @@ variable "access_logs_prefix" {
   default = null
 }
 variable "ssl_policy" {
-  type = string
+  type    = string
   default = "ELBSecurityPolicy-2016-08"
-  }
+}
 
 variable "tags" {
   type    = map(string)

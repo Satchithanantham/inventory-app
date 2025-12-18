@@ -16,17 +16,17 @@ variable "ecs_services" {
   }))
   default = [
     {
-      name           = "backend"
-      cluster_name   = "inventory-cluster"
-      service_name   = "backend-service"
-      cpu_threshold  = 80
+      name             = "backend"
+      cluster_name     = "inventory-cluster"
+      service_name     = "backend-service"
+      cpu_threshold    = 80
       memory_threshold = 80
     },
     {
-      name           = "frontend"
-      cluster_name   = "inventory-cluster"
-      service_name   = "frontend-service"
-      cpu_threshold  = 80
+      name             = "frontend"
+      cluster_name     = "inventory-cluster"
+      service_name     = "frontend-service"
+      cpu_threshold    = 80
       memory_threshold = 80
     }
   ]

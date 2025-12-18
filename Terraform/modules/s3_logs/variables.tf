@@ -1,10 +1,10 @@
 variable "app_name" {
-  type        = string
+  type = string
 }
 variable "account_id" {
-  type        = string
+  type = string
 }
 variable "tags" {
-  type        = map(string)
-  default     = {}
+  type    = map(string)
+  default = {}
 }

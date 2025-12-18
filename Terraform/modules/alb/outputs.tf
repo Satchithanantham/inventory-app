@@ -23,7 +23,7 @@ output "frontend_tg_arn" {
 }
 output "alb_arn_suffix" {
   description = "ALB ARN suffix (used for CloudWatch metric dimensions)"
-  value       = replace(
+  value = replace(
     aws_lb.load_balancer.arn,
     "arn:aws:elasticloadbalancing:${var.aws_region}:${data.aws_caller_identity.current.account_id}:loadbalancer/",
     ""

@@ -6,8 +6,8 @@ locals {
     { name = "DB_NAME", value = var.db_name }
   ] : []
 
-   db_secrets = length(trim(var.db_password_secret_arn, "")) > 0 ? [
-    { name = "DB_USER",     valueFrom = "${var.db_password_secret_arn}:username::" },
+  db_secrets = length(trim(var.db_password_secret_arn, "")) > 0 ? [
+    { name = "DB_USER", valueFrom = "${var.db_password_secret_arn}:username::" },
     { name = "DB_PASSWORD", valueFrom = "${var.db_password_secret_arn}:password::" }
   ] : []
 }
@@ -19,17 +19,17 @@ resource "aws_ecs_service" "api" {
   launch_type     = "FARGATE"
 
   network_configuration {
-    subnets         = var.private_subnet_ids
-    security_groups = [var.ecs_sg_id]
+    subnets          = var.private_subnet_ids
+    security_groups  = [var.ecs_sg_id]
     assign_public_ip = false
- 
- }
- load_balancer {
+
+  }
+  load_balancer {
     target_group_arn = var.target_group_arn
     container_name   = var.container_name
     container_port   = var.container_port
   }
- depends_on = [aws_ecs_task_definition.api, var.target_group_arn]
+  depends_on = [aws_ecs_task_definition.api, var.target_group_arn]
 }
 
 
@@ -44,8 +44,8 @@ resource "aws_ecs_task_definition" "api" {
 
   container_definitions = jsonencode([
     {
-      name      = var.container_name
-      image     = var.image
+      name  = var.container_name
+      image = var.image
       portMappings = [
         {
           containerPort = var.container_port

@@ -10,6 +10,6 @@ variable "alb_zone_id" {
 
 variable "records" {
   type        = map(string)
-  default = {}
+  default     = {}
   description = "Map of subdomain names to ALB DNS names, e.g. { api = <dns>, frontend = <dns> }"
 }

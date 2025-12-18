@@ -1,12 +1,12 @@
 
 variable "app_name" {
-        type   = string
+  type = string
 }
 
 # Scope the task role to only these Secrets Manager ARNs (least privilege).
 variable "allowed_secret_arns" {
-  type        = list(string)
-  default     = []
+  type    = list(string)
+  default = []
 }
 
 # If your secrets/parameters use customer-managed KMS keys, add their ARNs here.

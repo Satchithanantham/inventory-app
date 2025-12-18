@@ -74,8 +74,8 @@ resource "aws_iam_role" "task_role" {
 data "aws_iam_policy_document" "task_role_base" {
   # Secrets Manager scoped read
   statement {
-    sid     = "SecretsReadScoped"
-    actions = ["secretsmanager:GetSecretValue"]
+    sid       = "SecretsReadScoped"
+    actions   = ["secretsmanager:GetSecretValue"]
     resources = length(var.allowed_secret_arns) > 0 ? var.allowed_secret_arns : ["*"]
   }
 
@@ -83,7 +83,7 @@ data "aws_iam_policy_document" "task_role_base" {
   dynamic "statement" {
     for_each = var.enable_ssm_param_read ? [true] : []
     content {
-      sid     = "SSMParameterRead"
+      sid = "SSMParameterRead"
       actions = [
         "ssm:GetParameter",
         "ssm:GetParameters",

@@ -2,8 +2,8 @@
 # WAFv2 WEB ACL
 ################################
 resource "aws_wafv2_web_acl" "waf_web_acl" {
-  name  = var.web_acl_name
-  scope = var.scope
+  name        = var.web_acl_name
+  scope       = var.scope
   description = "WAF for ${var.web_acl_name}"
 
   default_action {

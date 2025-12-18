@@ -34,6 +34,6 @@ variable "db_name" {
 }
 
 variable "db_password_secret_arn" {
-  type = string
+  type    = string
   default = ""
 }

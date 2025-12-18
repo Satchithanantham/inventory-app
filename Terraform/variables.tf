@@ -3,7 +3,7 @@ variable "aws_region" {
 }
 
 variable "account_id" {
-  type        = string
+  type = string
 }
 
 
@@ -88,18 +88,18 @@ variable "hosted_zone_id" {
 }
 
 variable "ecs_sg_id" {
-  type        = string
+  type    = string
   default = " "
 }
 
 variable "db_password_secret_arn" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "db_name" {
-  type        = string
-  default     = "inventory"
+  type    = string
+  default = "inventory"
 }
 
 variable "alert_email" {
@@ -113,6 +113,6 @@ variable "api_domain_name" {
 }
 
 variable "db_username_secret_arn" {
-  type        = string
+  type    = string
   default = ""
 }

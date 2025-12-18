@@ -20,7 +20,7 @@ variable "alb_sg_id" {
 }
 
 variable "ecs_sg_id" {
-  type        = string
+  type    = string
   default = " "
 }
 variable "target_group_arn" {
@@ -76,7 +76,7 @@ variable "secrets" {
   default = []
 }
 variable "ecs_cluster_id" {
-  type        = string
+  type = string
 }
 variable "container_name" {
   type = string
