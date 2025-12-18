@@ -116,3 +116,4 @@ variable "db_username_secret_arn" {
   type    = string
   default = ""
 }
+

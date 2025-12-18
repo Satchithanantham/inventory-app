@@ -51,6 +51,11 @@ module "cloudwatch_frontend" {
   retention_in_days = 14
 }
 
+# S3 Bucket for ALB Access Logs (already defined in your S3 module)
+module "s3" {
+  source = "./modules/s3_logs"
+  app_name = var.app_name
+}
 # ----------------------------
 # 3) ALB
 # ----------------------------
@@ -64,9 +69,9 @@ module "alb" {
   enable_https    = var.enable_https
   certificate_arn = var.certificate_arn
 
-  enable_access_logs = false
-  access_logs_bucket = null
-  access_logs_prefix = null
+  enable_access_logs = true
+  access_logs_bucket = module.s3.alb_logs_bucket_name
+  access_logs_prefix = "alb"
 
   depends_on = [aws_ecs_cluster.main]
 }

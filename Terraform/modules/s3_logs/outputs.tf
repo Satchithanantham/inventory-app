@@ -1,4 +1,4 @@
-output "alb_access_logs_bucket_name" {
+output "alb_logs_bucket_name" {
   description = "S3 bucket name where ALB access logs are stored"
   value       = aws_s3_bucket.alb_logs.bucket
 }
