@@ -61,11 +61,7 @@ resource "aws_lb" "load_balancer" {
   }
 
   tags = merge(var.tags, { Name = "${var.app_name}-alb" })
-  depends_on = [
-    aws_s3_bucket.alb_logs,
-    aws_s3_bucket_ownership_controls.alb_logs,
-    aws_s3_bucket_policy.alb_logs
-  ]
+
 }
 
 ################################
