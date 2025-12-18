@@ -74,7 +74,7 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('Terraform') {
-                    sh 'terraform apply -auto-approve'
+                    sh 'terraform apply -auto-approve -lock=false'
                 }
             }
         }
