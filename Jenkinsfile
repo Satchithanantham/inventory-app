@@ -74,7 +74,7 @@ pipeline {
         stage('Terraform Apply') {
             steps {
                 dir('Terraform') {
-                    sh 'terraform apply -auto-approve -lock=false'
+                    sh 'terraform apply -auto-approve -lock=false -var-file=terraform.tfvars'
                 }
             }
         }
