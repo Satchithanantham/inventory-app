@@ -21,9 +21,17 @@ pipeline {
             }
         }
 
+        stage('Debug Workspace') {
+            steps {
+                echo "Listing workspace contents..."
+                sh 'pwd'
+                sh 'ls -l'
+            }
+        }
+
         stage('Terraform Validate') {
             steps {
-                dir('terraform') {
+                dir('Terraform') {
                     sh '''
                         terraform init -input=false
                         terraform fmt -check
@@ -41,7 +49,7 @@ pipeline {
                     docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com
 
                     echo "Building backend Docker image..."
-                    docker build -t $ECR_BACKEND:$IMAGE_TAG backend
+                    docker build -t $ECR_BACKEND:$IMAGE_TAG Backend
                     docker tag $ECR_BACKEND:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG
                     docker push ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG
                 '''
@@ -56,7 +64,7 @@ pipeline {
                     docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com
 
                     echo "Building frontend Docker image..."
-                    docker build -t $ECR_FRONTEND:$IMAGE_TAG frontend
+                    docker build -t $ECR_FRONTEND:$IMAGE_TAG Frontend
                     docker tag $ECR_FRONTEND:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG
                     docker push ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG
                 '''
@@ -65,7 +73,7 @@ pipeline {
 
         stage('Terraform Apply') {
             steps {
-                dir('terraform') {
+                dir('Terraform') {
                     sh 'terraform apply -auto-approve'
                 }
             }
