@@ -1,3 +1,5 @@
+data "aws_elb_service_account" "this" {}
+
 data "aws_caller_identity" "current" {}
 
 # S3 BUCKET FOR ALB ACCESS LOGS
@@ -23,6 +25,8 @@ resource "aws_s3_bucket_ownership_controls" "alb_logs" {
 ################################
 # BUCKET POLICY – ALB LOG WRITE
 ################################
+
+
 resource "aws_s3_bucket_policy" "alb_logs" {
   bucket = aws_s3_bucket.alb_logs.id
 
@@ -33,19 +37,15 @@ resource "aws_s3_bucket_policy" "alb_logs" {
         Sid    = "AllowALBAccessLogs"
         Effect = "Allow"
         Principal = {
-          Service = "elasticloadbalancing.amazonaws.com"
+          AWS = data.aws_elb_service_account.this.arn
         }
         Action   = "s3:PutObject"
-        Resource = "${aws_s3_bucket.alb_logs.arn}/*"
-        Condition = {
-          StringEquals = {
-            "s3:x-amz-acl" = "bucket-owner-full-control"
-          }
-        }
+        Resource = "${aws_s3_bucket.alb_logs.arn}/alb/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
       }
     ]
   })
 }
+
 
 ################################
 # OPTIONAL: LIFECYCLE (COST SAVE)

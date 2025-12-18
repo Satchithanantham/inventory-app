@@ -81,6 +81,10 @@ module "alb" {
   access_logs_bucket = module.s3.alb_logs_bucket_name
   access_logs_prefix = "alb"
 
+  depends_on = [
+    module.s3
+  ]
+
 }
 
 
