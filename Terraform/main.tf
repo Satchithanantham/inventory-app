@@ -53,7 +53,7 @@ module "cloudwatch_frontend" {
 
 # S3 Bucket for ALB Access Logs (already defined in your S3 module)
 module "s3" {
-  source = "./modules/s3_logs"
+  source   = "./modules/s3_logs"
   app_name = var.app_name
 }
 # ----------------------------
