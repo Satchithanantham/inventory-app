@@ -1,0 +1,38 @@
+
+# ---- Dependencies stage ----
+FROM node:18-alpine AS deps
+WORKDIR /app
+
+# Copy manifest files first; works even if package-lock.json is missing
+COPY package*.json ./
+
+# Deterministic install if lockfile exists; otherwise fallback to production install
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --production; fi
+
+# Copy application source (app.js, db.js, etc.)
+COPY . .
+
+# ---- Runtime stage ----
+FROM node:18-alpine
+ENV NODE_ENV=production
+WORKDIR /app
+
+# Run as non-root for better security
+USER node
+
+# Copy built app and node_modules from deps stage
+COPY --from=deps /app /app
+
+# Expose backend port
+EXPOSE 5000
+
+# Healthcheck using Node (no curl/wget needed)
+# It requests /health and exits 0 on 200 OK, otherwise 1
+HEALTHCHECK --interval=30s --timeout=3s CMD node -e "\
+  const http=require('http'); \
+  http.get('http://localhost:5000/health', res => { \
+    process.exit(res.statusCode===200?0:1); \
+  }).on('error', () => process.exit(1));"
+
+# Start the app
+CMD ["node", "app.js"]

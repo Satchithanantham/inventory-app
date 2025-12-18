@@ -1,0 +1,14 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+
+# Jenkins
+jenkins-cli.jar
+
+# Node
+node_modules/
+
+# OS
+.DS_Store

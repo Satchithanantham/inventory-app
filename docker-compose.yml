@@ -1,0 +1,56 @@
+
+version: "3.9"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: books-db
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: inventory
+      # Optional app user (recommended for prod; backend can use this instead of root)
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppassword
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    healthcheck:
+      # Use root password so healthcheck succeeds even before users are created
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -ppassword --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./Backend   # <-- ensure this matches your actual folder name
+    container_name: books-backend
+    ports:
+      - "5000:5000"
+    environment:
+      # These match your db.js defaults and compose network service name
+      DB_HOST: db
+      DB_USER: root           # or appuser (if you switch to non-root)
+      DB_PASSWORD: password   # or apppassword
+      DB_NAME: inventory
+      PORT: 5000
+      NODE_ENV: development
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./Frontend    # <-- ensure this matches your actual folder name
+    container_name: books-frontend
+    ports:
+      - "3000:80"
+    environment:
+      # Call backend via docker network hostname (service name)
+      REACT_APP_API_BASE: http://books-backend:5000/api
+    depends_on:
+      - backend
+
+volumes:
+  dbdata:
