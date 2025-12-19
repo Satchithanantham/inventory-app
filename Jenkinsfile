@@ -41,6 +41,22 @@ pipeline {
             }
         }
 
+        stage('Terraform Plan') {
+            steps {
+                dir('Terraform') {
+                    sh 'terraform plan -var-file=terraform.tfvars'
+                }
+            }
+        }
+
+        stage('Approval') {
+            steps {
+                input message: "Approve to continue?",
+                      ok: "Yes, continue",
+                      submitter: "admin,devops"
+            }
+        }
+
         stage('Build & Push Backend') {
             steps {
                 sh '''
