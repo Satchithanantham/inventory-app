@@ -33,16 +33,15 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonarcloud') {
                     script {
-                        // Must match the exact name configured in Jenkins Global Tool Configuration
                         def scannerHome = tool 'SonarScanner'
-                        sh """
+                        sh '
                             ${scannerHome}/bin/sonar-scanner \
                               -Dsonar.organization=satchithanantham \
                               -Dsonar.projectKey=satchithanantham_inventory-app \
                               -Dsonar.sources=. \
                               -Dsonar.host.url=https://sonarcloud.io \
                               -Dsonar.login=$SONAR_TOKEN
-                        """
+                        '
                     }
                 }
             }
@@ -50,7 +49,7 @@ pipeline {
 
         stage('Quality Gate') {
             when {
-                branch 'main' // Only enforce on main branch
+                branch 'main'
             }
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
@@ -89,27 +88,27 @@ pipeline {
 
         stage('Build & Push Backend') {
             steps {
-                sh """
-                    aws ecr get-login-password --region $AWS_REGION | \
-                    docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com
+                script {
+                    sh 'aws ecr get-login-password --region ' + AWS_REGION + \
+                       ' | docker login --username AWS --password-stdin ' + AWS_ACCOUNT_ID + '.dkr.ecr.' + AWS_REGION + '.amazonaws.com'
 
-                    docker build -t $ECR_BACKEND:$IMAGE_TAG Backend
-                    docker tag $ECR_BACKEND:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG
-                    docker push ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG
-                """
+                    sh 'docker build -t ' + ECR_BACKEND + ':' + IMAGE_TAG + ' Backend'
+                    sh 'docker tag ' + ECR_BACKEND + ':' + IMAGE_TAG + ' ' + AWS_ACCOUNT_ID + '.dkr.ecr.' + AWS_REGION + '.amazonaws.com/' + ECR_BACKEND + ':' + IMAGE_TAG
+                    sh 'docker push ' + AWS_ACCOUNT_ID + '.dkr.ecr.' + AWS_REGION + '.amazonaws.com/' + ECR_BACKEND + ':' + IMAGE_TAG
+                }
             }
         }
 
         stage('Build & Push Frontend') {
             steps {
-                sh """
-                    aws ecr get-login-password --region $AWS_REGION | \
-                    docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com
+                script {
+                    sh 'aws ecr get-login-password --region ' + AWS_REGION + \
+                       ' | docker login --username AWS --password-stdin ' + AWS_ACCOUNT_ID + '.dkr.ecr.' + AWS_REGION + '.amazonaws.com'
 
-                    docker build -t $ECR_FRONTEND:$IMAGE_TAG Frontend
-                    docker tag $ECR_FRONTEND:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG
-                    docker push ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG
-                """
+                    sh 'docker build -t ' + ECR_FRONTEND + ':' + IMAGE_TAG + ' Frontend'
+                    sh 'docker tag ' + ECR_FRONTEND + ':' + IMAGE_TAG + ' ' + AWS_ACCOUNT_ID + '.dkr.ecr.' + AWS_REGION + '.amazonaws.com/' + ECR_FRONTEND + ':' + IMAGE_TAG
+                    sh 'docker push ' + AWS_ACCOUNT_ID + '.dkr.ecr.' + AWS_REGION + '.amazonaws.com/' + ECR_FRONTEND + ':' + IMAGE_TAG
+                }
             }
         }
 
