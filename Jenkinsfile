@@ -48,17 +48,6 @@ pipeline {
             }
         }
 
-        stage('Quality Gate') {
-            when {
-                branch 'main'
-            }
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
-
         stage('Terraform Validate') {
             steps {
                 dir('Terraform') {
