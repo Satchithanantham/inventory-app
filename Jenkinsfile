@@ -32,7 +32,7 @@ pipeline {
 
        
         stage('SonarQube Analysis') {
-    steps {
+        steps {
         withSonarQubeEnv('sonarcloud') {
             script {
                 def scannerHome = tool 'SonarScanner' 
