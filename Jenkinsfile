@@ -33,16 +33,17 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonarcloud') {
                     script {
-                        def scannerHome = tool 'SonarScanner'
-                        sh '''
-                            ${scannerHome}/bin/sonar-scanner \
-                              -Dsonar.organization=satchithanantham \
-                              -Dsonar.projectKey=satchithanantham_inventory-app \
-                              -Dsonar.sources=. \
-                              -Dsonar.host.url=https://sonarcloud.io \
-                              -Dsonar.login=$SONAR_TOKEN
-                        '''
-                    }
+                // Must match the exact "Name" in Global Tool Configuration
+                def scannerHome = tool 'SonarScanner'
+                sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                      -Dsonar.organization=satchithanantham \
+                      -Dsonar.projectKey=satchithanantham_inventory-app \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=https://sonarcloud.io \
+                      -Dsonar.login=$SONAR_TOKEN
+                """
+            }
                 }
             }
         }
