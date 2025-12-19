@@ -2,11 +2,11 @@ pipeline {
     agent { label 'jenkins-agent' }
 
     environment {
-        AWS_REGION = 'us-east-1'
-        AWS_ACCOUNT_ID = '529088274428'
-        ECR_BACKEND = "inventory-backend"
-        ECR_FRONTEND = "inventory-frontend"
-        SONAR_TOKEN = credentials('jenkins-sonar-token')
+        AWS_REGION       = 'us-east-1'
+        AWS_ACCOUNT_ID   = '529088274428'
+        ECR_BACKEND      = "inventory-backend"
+        ECR_FRONTEND     = "inventory-frontend"
+        SONAR_TOKEN      = credentials('jenkins-sonar-token') // Jenkins credential for SonarCloud token
     }
 
     stages {
@@ -15,7 +15,6 @@ pipeline {
             steps {
                 checkout scm
                 script {
-                    // Use short Git commit hash as image tag
                     env.IMAGE_TAG = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
                     echo "IMAGE_TAG = ${env.IMAGE_TAG}"
                 }
@@ -30,28 +29,29 @@ pipeline {
             }
         }
 
-       
         stage('SonarQube Analysis') {
-
-        steps {
-           withSonarQubeEnv('sonarcloud') {
-            script {
-                def scannerHome = tool 'SonarScanner' 
-                sh "${scannerHome}/bin/sonar-scanner \
-                    -Dsonar.organization=satchithanantham \
-                    -Dsonar.projectKey=satchithanantham_inventory-app \
-                    -Dsonar.sources=. \
-                    -Dsonar.host.url=$SONAR_HOST_URL \
-                    -Dsonar.login=$SONAR_TOKEN"
+            steps {
+                withSonarQubeEnv('sonarcloud') {
+                    script {
+                        // Must match the exact name configured in Jenkins Global Tool Configuration
+                        def scannerHome = tool 'SonarScanner'
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                              -Dsonar.organization=satchithanantham \
+                              -Dsonar.projectKey=satchithanantham_inventory-app \
+                              -Dsonar.sources=. \
+                              -Dsonar.host.url=https://sonarcloud.io \
+                              -Dsonar.login=$SONAR_TOKEN
+                        """
+                    }
+                }
             }
         }
-    }
-}
 
-
-      
         stage('Quality Gate') {
-    
+            when {
+                branch 'main' // Only enforce on main branch
+            }
             steps {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
@@ -89,31 +89,27 @@ pipeline {
 
         stage('Build & Push Backend') {
             steps {
-                sh '''
-                    echo "Logging into ECR (backend)..."
+                sh """
                     aws ecr get-login-password --region $AWS_REGION | \
                     docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com
 
-                    echo "Building backend Docker image..."
                     docker build -t $ECR_BACKEND:$IMAGE_TAG Backend
                     docker tag $ECR_BACKEND:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG
                     docker push ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG
-                '''
+                """
             }
         }
 
         stage('Build & Push Frontend') {
             steps {
-                sh '''
-                    echo "Logging into ECR (frontend)..."
+                sh """
                     aws ecr get-login-password --region $AWS_REGION | \
                     docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com
 
-                    echo "Building frontend Docker image..."
                     docker build -t $ECR_FRONTEND:$IMAGE_TAG Frontend
                     docker tag $ECR_FRONTEND:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG
                     docker push ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG
-                '''
+                """
             }
         }
 
@@ -143,10 +139,10 @@ pipeline {
 
     post {
         success {
-            echo "Deployment successful! Backend and Frontend updated."
+            echo " Deployment successful! Backend and Frontend updated."
         }
         failure {
-            echo "Deployment failed. Check logs for details."
+            echo " Deployment failed. Check logs for details."
         }
     }
 }
