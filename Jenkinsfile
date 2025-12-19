@@ -34,14 +34,14 @@ pipeline {
                 withSonarQubeEnv('sonarcloud') {
                     script {
                         def scannerHome = tool 'SonarScanner'
-                        sh """
+                        sh '''
                             ${scannerHome}/bin/sonar-scanner \
                               -Dsonar.organization=satchithanantham \
                               -Dsonar.projectKey=satchithanantham_inventory-app \
                               -Dsonar.sources=. \
                               -Dsonar.host.url=https://sonarcloud.io \
                               -Dsonar.login=$SONAR_TOKEN
-                        """
+                        '''
                     }
                 }
             }
@@ -61,11 +61,11 @@ pipeline {
         stage('Terraform Validate') {
             steps {
                 dir('Terraform') {
-                    sh """
+                    sh '''
                         terraform init -input=false
                         terraform fmt -check
                         terraform validate
-                    """
+                    '''
                 }
             }
         }
@@ -89,14 +89,14 @@ pipeline {
         stage('Build & Push Backend') {
             steps {
                 script {
-                    sh """
+                    sh '''
                         aws ecr get-login-password --region $AWS_REGION | \
                         docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com
 
                         docker build -t $ECR_BACKEND:$IMAGE_TAG Backend
                         docker tag $ECR_BACKEND:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG
                         docker push ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_BACKEND:$IMAGE_TAG
-                    """
+                    '''
                 }
             }
         }
@@ -104,14 +104,14 @@ pipeline {
         stage('Build & Push Frontend') {
             steps {
                 script {
-                    sh """
+                    sh '''
                         aws ecr get-login-password --region $AWS_REGION | \
                         docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com
 
                         docker build -t $ECR_FRONTEND:$IMAGE_TAG Frontend
                         docker tag $ECR_FRONTEND:$IMAGE_TAG ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG
                         docker push ${AWS_ACCOUNT_ID}.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_FRONTEND:$IMAGE_TAG
-                    """
+                    '''
                 }
             }
         }
@@ -142,10 +142,10 @@ pipeline {
 
     post {
         success {
-            echo " Deployment successful! Backend and Frontend updated."
+            echo "Deployment successful! Backend and Frontend updated."
         }
         failure {
-            echo " Deployment failed. Check logs for details."
+            echo "Deployment failed. Check logs for details."
         }
     }
 }
