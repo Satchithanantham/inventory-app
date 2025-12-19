@@ -32,19 +32,21 @@ pipeline {
 
        
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('sonarcloud') {
-                    sh '''
-                    sonar-scanner \
-                      -Dsonar.organization=satchithanantham \
-                      -Dsonar.projectKey=satchithanantham_inventory-app \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=https://sonarcloud.io \
-                      -Dsonar.login=$SONAR_TOKEN
-                    '''
-                }
+    steps {
+        withSonarQubeEnv('sonarcloud') {
+            script {
+                def scannerHome = tool 'SonarScanner' 
+                sh "${scannerHome}/bin/sonar-scanner \
+                    -Dsonar.organization=satchithanantham \
+                    -Dsonar.projectKey=satchithanantham_inventory-app \
+                    -Dsonar.sources=. \
+                    -Dsonar.host.url=$SONAR_HOST_URL \
+                    -Dsonar.login=$SONAR_TOKEN"
             }
         }
+    }
+}
+
 
       
         stage('Quality Gate') {
