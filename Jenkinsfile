@@ -6,6 +6,7 @@ pipeline {
         AWS_ACCOUNT_ID = '529088274428'
         ECR_BACKEND = "inventory-backend"
         ECR_FRONTEND = "inventory-frontend"
+        SONAR_TOKEN = credentials('jenkins-sonar-token')
     }
 
     stages {
@@ -26,6 +27,34 @@ pipeline {
                 echo "Listing workspace contents..."
                 sh 'pwd'
                 sh 'ls -l'
+            }
+        }
+
+       
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('sonarcloud') {
+                    sh '''
+                    sonar-scanner \
+                      -Dsonar.organization=satchithanantham \
+                      -Dsonar.projectKey=satchithanantham_inventory-app \
+                      -Dsonar.sources=. \
+                      -Dsonar.host.url=https://sonarcloud.io \
+                      -Dsonar.login=$SONAR_TOKEN
+                    '''
+                }
+            }
+        }
+
+      
+        stage('Quality Gate') {
+            when {
+                branch 'main'
+            }
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
 
@@ -91,7 +120,6 @@ pipeline {
             steps {
                 dir('Terraform') {
                     sh 'terraform apply -auto-approve -lock=false -var-file=terraform.tfvars'
-
                 }
             }
         }
@@ -114,10 +142,10 @@ pipeline {
 
     post {
         success {
-            echo " Deployment successful! Backend and Frontend updated."
+            echo "Deployment successful! Backend and Frontend updated."
         }
         failure {
-            echo " Deployment failed. Check logs for details."
+            echo "Deployment failed. Check logs for details."
         }
     }
 }
